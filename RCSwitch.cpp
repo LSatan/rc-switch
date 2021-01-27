@@ -547,8 +547,14 @@ void RCSwitch::transmit(HighLow pulses) {
  * Enable receiving data
  */
 void RCSwitch::enableReceive(int interrupt) {
+#if defined(ESP32)
+  pinMode(interrupt,INPUT);
+  this->nReceiverInterrupt = digitalPinToInterrupt(interrupt);
+  this->enableReceive();
+#else
   this->nReceiverInterrupt = interrupt;
   this->enableReceive();
+#endif
 }
 
 void RCSwitch::enableReceive() {
@@ -558,7 +564,7 @@ void RCSwitch::enableReceive() {
 #if defined(RaspberryPi) // Raspberry Pi
     wiringPiISR(this->nReceiverInterrupt, INT_EDGE_BOTH, &handleInterrupt);
 #else // Arduino
-    attachInterrupt(this->nReceiverInterrupt, handleInterrupt, CHANGE);
+attachInterrupt(this->nReceiverInterrupt, handleInterrupt, CHANGE);
 #endif
   }
 }
